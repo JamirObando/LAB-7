@@ -1,0 +1,81 @@
+<html>
+<head>
+  <style type="text/css" id="operaUserStyle"></style>
+  <style type="text/css"></style>
+</head>
+<body class="mx-auto" style="width: 400px;">
+
+  <h2>You are from:</h2>
+  <p id="city">CITY</p>
+  <p id="country">COUNTRY</p>
+  
+  <h2>Your IP Address is:</h2>
+  <p id="ip">IP ADDRESS</p>
+
+  <h2>The weather there is: </h2>
+  <p id="weather">WEATHER</p>
+
+  <h2>Your Internet Service Provider is:</h2>
+  <p id="isp">PROVIDER</p>
+
+  <script>
+    async function loadLocation() {
+      // First API call to get the public IP address
+      const myIpAddress = await fetch("https://api.ipify.org?format=json");
+      const ipAddress = await myIpAddress.json();
+      console.log("my IP Address is: ", ipAddress);
+
+      // Display the IP address on the webpage
+      document.getElementById("ip").innerHTML = ipAddress.ip;
+
+      // Second API call: Get location details using the IP address
+      const response = await fetch("https://ip-geolocation-ipwhois-io.p.rapidapi.com/json/?ip=" + ipAddress.ip, {
+        "method": "GET",
+        "headers": {
+          "x-rapidapi-host": "ip-geolocation-ipwhois-io.p.rapidapi.com",
+          "x-rapidapi-key": "044e648b19mshfece6f865ead2b3p1a1a7ajsn036a4345378f"
+        }
+      });
+      const location = await response.json();
+
+      // Display city, country, and ISP from the second API
+      document.getElementById("city").innerHTML = location.city;
+      document.getElementById("country").innerHTML = location.country;
+      document.getElementById("isp").innerHTML = location.isp;
+
+      console.log(location);
+
+      // Third API call: Get weather using the city (from the second API call)
+      const responseW = await fetch("https://community-open-weather-map.p.rapidapi.com/find?q=" + location.city + "&units=imperial", {
+        "method": "GET",
+        "headers": {
+          "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
+          "x-rapidapi-key": "044e648b19mshfece6f865ead2b3p1a1a7ajsn036a4345378f"
+        }
+      });
+      const weather = await responseW.json();
+
+      // Display weather info from the third API call
+      document.getElementById("weather").innerHTML = weather.list[0].weather[0].description;
+      console.log(weather.list[0].weather[0].main);
+
+      // Fourth API call: Get weather using the location (latitude and longitude from second API call)
+      const lat = location.latitude;
+      const lon = location.longitude;
+      const responseW2 = await fetch("https://community-open-weather-map.p.rapidapi.com/weather?lat=" + lat + "&lon=" + lon + "&units=imperial", {
+        "method": "GET",
+        "headers": {
+          "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
+          "x-rapidapi-key": "044e648b19mshfece6f865ead2b3p1a1a7ajsn036a4345378f"
+        }
+      });
+      const weather2 = await responseW2.json();
+
+      // Display the weather from the fourth API call (using lat/lon)
+      console.log(weather2.weather[0].main);
+    }
+
+    loadLocation();
+  </script>
+</body>
+</html>
